@@ -33,3 +33,16 @@ instance Bifunctor Validated where
         Invalid (f e)
     bimap _ g (Valid a) =
         Valid (g a)
+
+-- TODO check
+instance Applicative (Validated e) where
+    pure = Valid
+    Invalid e1 <*> Invalid _ = Invalid e1
+    Invalid e1 <*> Valid _ = Invalid e1
+    Valid _ <*> Invalid e2 = Invalid e2
+    Valid f <*> Valid a = Valid (f a)
+
+instance Monad (Validated a) where
+    return = Valid
+    Invalid e >>= _ = Invalid e
+    Valid a >>= f = f a
