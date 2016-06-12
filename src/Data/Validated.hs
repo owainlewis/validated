@@ -3,6 +3,9 @@ module Data.Validated where
 import           Control.Applicative
 import           Data.Bifunctor
 
+-- A Validated type for things that can be validated
+--
+--
 data Validated a b = Invalid a | Valid b
   deriving ( Eq, Ord, Show )
 
@@ -34,7 +37,6 @@ instance Bifunctor Validated where
     bimap _ g (Valid a) =
         Valid (g a)
 
--- TODO check
 instance Applicative (Validated e) where
     pure = Valid
     Invalid e1 <*> Invalid _ = Invalid e1
@@ -46,3 +48,12 @@ instance Monad (Validated a) where
     return = Valid
     Invalid e >>= _ = Invalid e
     Valid a >>= f = f a
+
+-- | Collect all failure results into a list
+failures :: [a] -> [Validated a t] -> [a]
+failures acc [] = acc
+failures acc ((Invalid x) : ys) = failures (x : acc) ys
+failures acc (_ : ys) = failures acc ys
+
+failed :: [Validated a t] -> [a]
+failed = failures []
