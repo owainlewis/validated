@@ -1,11 +1,9 @@
-module Data.Validated where
+module Data.Validated 
+  where
 
 import           Control.Applicative
 import           Data.Bifunctor
 
--- A Validated type for things that can be validated
---
---
 data Validated a b = Invalid a | Valid b
   deriving ( Eq, Ord, Show )
 
