@@ -1,5 +1,8 @@
 module Data.Validated 
-  where
+  ( Validated
+  , isValid
+  , isInvalid
+  ) where
 
 import           Control.Applicative
 import           Data.Bifunctor
