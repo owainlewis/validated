@@ -1,4 +1,16 @@
-module Data.Validated 
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Validated
+-- Copyright   :  (C) 2016 Owain Lewis
+-- License     :  BSD-style (see the file LICENSE)
+--
+-- Maintainer  :  Owain Lewis <owain@owainlewis.com>
+-- Stability   :  provisional
+--
+-- This module provides a Validated data type
+-----------------------------------------------------------------------------
+
+module Data.Validated
   ( Validated
   , isValid
   , isInvalid
@@ -7,8 +19,9 @@ module Data.Validated
 import           Control.Applicative
 import           Data.Bifunctor
 
-data Validated a b = Invalid a | Valid b
-  deriving ( Eq, Ord, Show )
+data Validated a b = Invalid a
+                   | Valid b
+  deriving ( Eq, Ord, Read, Show )
 
 class Validation v where
     -- Construct a valid value
@@ -25,6 +38,10 @@ isValid (Valid _) = False
 
 isInvalid (Invalid _) = True
 isInvalid (Valid _) = False
+
+validated :: (a -> c) -> (b -> c) -> Validated a b -> c
+validated f _ (Invalid x)  =  f x
+validated _ g (Valid y)    =  g y
 
 instance Functor (Validated a) where
     fmap _ (Invalid e) =
@@ -50,11 +67,6 @@ instance Monad (Validated a) where
     Invalid e >>= _ = Invalid e
     Valid a >>= f = f a
 
--- | Collect all failure results into a list
-failures :: [a] -> [Validated a t] -> [a]
-failures acc [] = acc
-failures acc ((Invalid x) : ys) = failures (x : acc) ys
-failures acc (_ : ys) = failures acc ys
-
-failed :: [Validated a t] -> [a]
-failed = failures []
+-- Transformer instances
+--
+newtype ValidatedT e m a = ValidatedT { runValidatedT :: m (Validated e a) }
