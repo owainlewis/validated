@@ -18,6 +18,7 @@ module Data.Validated
 
 import           Control.Applicative
 import           Data.Bifunctor
+import           Data.Monoid
 
 data Validated a b = Invalid a
                    | Valid b
@@ -49,11 +50,20 @@ instance Functor (Validated a) where
     fmap f (Valid a) =
         Valid (f a)
 
+instance Foldable (Validated e) where
+    foldr f x (Valid a) = f a x
+    foldr _ x (Invalid _) = x
+
+instance Monoid e => Monoid (Validated e a) where
+    Invalid e1 `mappend` Invalid e2 = Invalid (e1 <> e2)
+    Invalid _ `mappend` Valid a2  = Valid a2
+    Valid a1  `mappend` Invalid _ = Valid a1
+    Valid a1 `mappend` Valid _ = Valid a1
+    mempty = Invalid mempty
+
 instance Bifunctor Validated where
-    bimap f _ (Invalid e) =
-        Invalid (f e)
-    bimap _ g (Valid a) =
-        Valid (g a)
+    bimap f _ (Invalid e) = Invalid (f e)
+    bimap _ g (Valid a)   = Valid (g a)
 
 instance Applicative (Validated e) where
     pure = Valid
